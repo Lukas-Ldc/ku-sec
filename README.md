@@ -8,11 +8,11 @@ ku_sec.sh : the script to execute
 
 autoapt.conf : the file used to update packages automatically
 
-disable.conf : the list of services to disable
+disable.conf : the list of services to disable, customize it as you wish
+
+remove.conf : the list of packages to remove, customize it as you wish
 
 fstab.conf : this file will be added to /etc/fstab.conf
-
-remove.conf : the list of packages to remove
 
 sysctl.conf : this file will be added to /etc/sysctl.conf
 

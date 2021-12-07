@@ -24,6 +24,12 @@ cat sysctl.conf >> /etc/sysctl.conf
 sysctl -p
 #
 #
+echo -e "${RED}Securing accounts - $(date "+%H:%M:%S %d/%m/%y")${NC}"
+#Hash of the password by a function considered secure
+echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
+echo "SHA_CRYPT_MIN_ROUNDS 65536" >> /etc/login.defs
+#
+#
 echo -e "${RED}Removing unnecessary packages - $(date "+%H:%M:%S %d/%m/%y")${NC}"
 #Uninstalling packages in remove.conf
 apt-get remove $(cat remove.conf) -y
@@ -31,9 +37,9 @@ apt-get remove $(cat remove.conf) -y
 #
 echo -e "${RED}Disabling unnecessary services - $(date "+%H:%M:%S %d/%m/%y")${NC}"
 #Disabling services in disable.conf
-while read -r l; do systemctl disable "$l"; done < disable.conf
+systemctl disable $(cat disable.conf)
 #Stoping services in disable.conf
-while read -r l; do systemctl stop "$l"; done < disable.conf
+systemctl stop $(cat disable.conf)
 #
 #
 echo -e "${RED}Packages updating and cleaning - $(date "+%H:%M:%S %d/%m/%y")${NC}"
