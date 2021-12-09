@@ -25,9 +25,21 @@ sysctl -p
 #
 #
 echo -e "${RED}Securing accounts - $(date "+%H:%M:%S %d/%m/%y")${NC}"
-#Hash of the password by a function considered secure
+#Modifying the function to hash passwords considered secure
 echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
 echo "SHA_CRYPT_MIN_ROUNDS 65536" >> /etc/login.defs
+#
+#
+echo -e "${RED}Securing files - $(date "+%H:%M:%S %d/%m/%y")${NC}"
+#Changing basic permissions for files and folders in general
+sed -i 's/USERGROUPS_ENAB.*.yes/USERGROUPS_ENAB no/g' /etc/login.defs
+sed -i 's/UMASK.*.022/UMASK 027/g' /etc/login.defs
+#Changing basic permitions for files and folders for users
+echo "umask 0077" >> /etc/profile
+#Removing the setuid bit of the files in setuid.conf
+chmod u-s $(cat setuid.conf | sed '/^#/d') 2>/dev/null
+#Adding a sticky bit to every directory accessible in writing
+find / -type d \( -perm -0002 -a \! -perm -1000 \) -exec chmod o+t {} \;
 #
 #
 echo -e "${RED}Removing unnecessary packages - $(date "+%H:%M:%S %d/%m/%y")${NC}"
@@ -61,7 +73,7 @@ cat autoapt.conf > /etc/cron.d/autoapt.sh
 #Making the user and the group of the file 'root'
 chown root:root /etc/cron.d/autoapt.sh
 #Giving the rights 'rwx' to the owner, 'r--' to the group and '---' to others
-chmod 744 /etc/cron.d/autoapt.sh
+chmod 740 /etc/cron.d/autoapt.sh
 #Adding in crontab the line to start the script every hour
 echo "0 * * * * root sudo /etc/cron.d/autoapt.sh" >> /etc/crontab
 #Restarting the cron service
