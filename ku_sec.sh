@@ -17,6 +17,12 @@ echo -e "${RED}Configuring sysctl - $(date "+%H:%M:%S %d/%m/%y")${NC}"
 cat sysctl.conf >> /etc/sysctl.conf
 #Loading /etc/sysctl.conf in sysctl settings
 sysctl -p
+#Reloading sysctl settings at startup
+echo "#!/bin/sh -e" >> /etc/rc.local
+echo "/etc/init.d/procps restart" >> /etc/rc.local
+echo "exit 0" >> /etc/rc.local
+#Giving the rights 'rwx' to the owner, 'r-x' to the group and '---' to others
+chmod 750 /etc/rc.local
 #
 #
 echo -e "${RED}Securing partitions - $(date "+%H:%M:%S %d/%m/%y")${NC}"
@@ -32,7 +38,7 @@ mount -a
 #
 echo -e "${RED}Securing accounts - $(date "+%H:%M:%S %d/%m/%y")${NC}"
 #Modifying the function to hash passwords considered secure
-echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
+#echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
 echo "SHA_CRYPT_MIN_ROUNDS 65536" >> /etc/login.defs
 #
 #

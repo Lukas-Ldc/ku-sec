@@ -10,7 +10,7 @@ disable.conf : the list of services to disable, customize it as you wish
 
 remove.conf : the list of packages to remove, customize it as you wish
 
-setuid.conf : the list of files for which the setuid will be removed, you can customize it
+setuid.conf : the list of files for which the setuid bit will be removed, you can customize it
 
 autoapt.conf : the file used to update packages automatically
 
