@@ -6,15 +6,10 @@ RED='\033[0;31m'
 echo -e "${RED}START - $(date "+%H:%M:%S %d/%m/%y")${NC}"
 #
 #
-echo -e "${RED}Securing partitions - $(date "+%H:%M:%S %d/%m/%y")${NC}"
-#Getting UUID of "/" mount point
-uuid=`cat /etc/fstab | grep " / " | grep "UUID=" | tr -s ' ' | cut -d "=" -f 2 | cut -d ' ' -f 1`
-#Getting file system type of "/"
-fsys=`cat /etc/fstab | grep " / " | grep "UUID=" | tr -s ' ' | cut -d "=" -f 2 | cut -d ' ' -f 3`
-#Adding fstab.conf in /etc/fstab with the right UUID and file system
-cat fstab.conf | sed "s/&uuid&/${uuid}/g" | sed "s/&fsys&/${fsys}/g" >> /etc/fstab
-#Mount all filesystems mentioned in fstab
-mount -a
+echo -e "${RED}Configuring sudo - $(date "+%H:%M:%S %d/%m/%y")${NC}"
+#Security guidelines applications for sudo
+echo "Defaults requiretty,use_pty,umask=0027" >> /etc/sudoers
+echo "Defaults ignore_dot,env_reset,passwd_timeout=1" >> /etc/sudoers
 #
 #
 echo -e "${RED}Configuring sysctl - $(date "+%H:%M:%S %d/%m/%y")${NC}"
@@ -22,6 +17,17 @@ echo -e "${RED}Configuring sysctl - $(date "+%H:%M:%S %d/%m/%y")${NC}"
 cat sysctl.conf >> /etc/sysctl.conf
 #Loading /etc/sysctl.conf in sysctl settings
 sysctl -p
+#
+#
+echo -e "${RED}Securing partitions - $(date "+%H:%M:%S %d/%m/%y")${NC}"
+#Getting UUID of "/" mount point
+uuid=`cat /etc/fstab | grep " / " | grep "UUID=" | tr -s ' ' | cut -d "=" -f 2 | cut -d ' ' -f 1`
+#Getting file system type of "/"
+fsys=`cat /etc/fstab | grep " / " | grep "UUID=" | tr -s ' ' | cut -d "=" -f 2 | cut -d ' ' -f 3`
+#Adding fstab.conf in /etc/fstab with the right UUID and file system
+cat fstab.conf | sed "s/&uuid&/${uuid}/g" | sed "s/&fsys&/${fsys}/g" >> /etc/fstab
+#Mount all file systems mentioned in fstab
+mount -a
 #
 #
 echo -e "${RED}Securing accounts - $(date "+%H:%M:%S %d/%m/%y")${NC}"
@@ -39,7 +45,7 @@ echo "umask 0077" >> /etc/profile
 #Removing the setuid bit of the files in setuid.conf
 chmod u-s $(cat setuid.conf | sed '/^#/d') 2>/dev/null
 #Adding a sticky bit to every directory accessible in writing
-find / -type d \( -perm -0002 -a \! -perm -1000 \) -exec chmod o+t {} \;
+find / -type d \( -perm -0002 -a \! -perm -1000 \) -exec chmod o+t {} \; 2>/dev/null
 #
 #
 echo -e "${RED}Removing unnecessary packages - $(date "+%H:%M:%S %d/%m/%y")${NC}"
@@ -54,19 +60,6 @@ systemctl disable $(cat disable.conf)
 systemctl stop $(cat disable.conf)
 #
 #
-echo -e "${RED}Packages updating and cleaning - $(date "+%H:%M:%S %d/%m/%y")${NC}"
-#Re-synchronize the package index files from their sources
-apt-get update -y
-#Install the newest versions of all packages and intelligently handles changing dependencies
-apt-get dist-upgrade -y
-#removes packages installed to satisfy dependencies of other packages that are no longer needed
-apt-get autoremove --purge -y
-#Clears out the local repository of retrieved package files
-apt-get autoclean -y
-#Updates all snaps in the system
-snap refresh
-#
-#
 echo -e "${RED}Automatisation of updates - $(date "+%H:%M:%S %d/%m/%y")${NC}"
 #Creating autoapt.sh in /etc/crond.d/ and adding inside autoapt.conf
 cat autoapt.conf > /etc/cron.d/autoapt.sh
@@ -78,6 +71,19 @@ chmod 740 /etc/cron.d/autoapt.sh
 echo "0 * * * * root sudo /etc/cron.d/autoapt.sh" >> /etc/crontab
 #Restarting the cron service
 systemctl restart cron.service
+#
+#
+echo -e "${RED}Packages updating and cleaning - $(date "+%H:%M:%S %d/%m/%y")${NC}"
+#Re-synchronize the package index files from their sources
+apt-get update -y
+#Install the newest versions of all packages and intelligently handles changing dependencies
+apt-get dist-upgrade -y
+#removes packages installed to satisfy dependencies of other packages that are no longer needed
+apt-get autoremove --purge -y
+#Clears out the local repository of retrieved package files
+apt-get autoclean -y
+#Updates all snaps in the system
+snap refresh
 #
 #
 echo -e "${RED}END - $(date "+%H:%M:%S %d/%m/%y")${NC}"
