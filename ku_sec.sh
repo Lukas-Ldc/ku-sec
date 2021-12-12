@@ -74,7 +74,7 @@ chown root:root /etc/cron.d/autoapt.sh
 #Giving the rights 'rwx' to the owner, 'r--' to the group and '---' to others
 chmod 740 /etc/cron.d/autoapt.sh
 #Adding in crontab the line to start the script every hour
-echo "0 * * * * root sudo /etc/cron.d/autoapt.sh" >> /etc/crontab
+echo "0 * * * * root /etc/cron.d/autoapt.sh" >> /etc/crontab
 #Restarting the cron service
 systemctl restart cron.service
 #
